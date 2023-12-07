@@ -83,16 +83,16 @@ public class ChibiCharacter extends GameObject {
 		if (this.X < 0) {
 			this.X = 0;
 			this.MovingVectorX = -this.MovingVectorX;
-		} else if (this.X > this.GameSurface_.getWidth() - this.Width) {
-			this.X = this.GameSurface_.getWidth() - this.Width;
+		} else if (this.X > this.GameSurface_.getWidth() - this.CharacterWidth) {
+			this.X = this.GameSurface_.getWidth() - this.CharacterWidth;
 			this.MovingVectorX = -this.MovingVectorX;
 		}
 
 		if (this.Y < 0) {
 			this.Y = 0;
 			this.MovingVectorY = -this.MovingVectorY;
-		} else if (this.Y > this.GameSurface_.getHeight() - this.Height) {
-			this.Y = this.GameSurface_.getHeight() - this.Height;
+		} else if (this.Y > this.GameSurface_.getHeight() - this.CharacterHeight) {
+			this.Y = this.GameSurface_.getHeight() - this.CharacterHeight;
 			this.MovingVectorY = -this.MovingVectorY;
 		}
 
