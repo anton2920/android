@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.media.MediaPlayer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -18,11 +19,14 @@ import java.util.List;
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 	public GameThread GameThread_;
+	public MediaPlayer MP;
 	public List<ChibiCharacter> Chibies = new ArrayList<>();
 	public List<Explosion> Explosions = new ArrayList<>();
 
 	public GameSurface(Context context) {
 		super(context);
+
+		MP = MediaPlayer.create(getContext().getApplicationContext(), R.raw.bgm);
 
 		this.setFocusable(true);
 		this.getHolder().addCallback(this);
@@ -59,6 +63,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 		this.Chibies.add(new ChibiCharacter(this, chibi1, 100, 50));
 		this.Chibies.add(new ChibiCharacter(this, chibi1, 300, 150));
 
+		this.MP.setLooping(true);
+		this.MP.start();
+
 		this.GameThread_ = new GameThread(this, holder);
 		this.GameThread_.Running = true;
 		this.GameThread_.start();
@@ -73,6 +80,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 	public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
 		while (true) {
 			try {
+				this.MP.stop();
 				this.GameThread_.Running = false;
 				this.GameThread_.join();
 				break;
@@ -96,7 +104,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 					it.remove();
 
 					Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.explosion);
-					this.Explosions.add(new Explosion(this, bitmap, chibi.X, chibi.Y));
+					this.Explosions.add(new Explosion(getContext(), this, bitmap, chibi.X, chibi.Y));
 				}
 			}
 
