@@ -12,12 +12,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 	public GameThread GameThread_;
 	public List<ChibiCharacter> Chibies = new ArrayList<>();
+	public List<Explosion> Explosions = new ArrayList<>();
 
 	public GameSurface(Context context) {
 		super(context);
@@ -30,6 +32,12 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 		for (ChibiCharacter chibi: this.Chibies) {
 			chibi.Update();
 		}
+
+		for (Explosion explosion: this.Explosions) {
+			explosion.Update();
+		}
+
+		this.Explosions.removeIf(explosion -> explosion.Finished);
 	}
 
 	@Override
@@ -38,6 +46,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 		for (ChibiCharacter chibi: this.Chibies) {
 			chibi.Draw(canvas);
+		}
+
+		for (Explosion explosion: this.Explosions) {
+			explosion.Draw(canvas);
 		}
 	}
 
@@ -75,6 +87,18 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			int x = (int) event.getX();
 			int y = (int) event.getY();
+
+			Iterator<ChibiCharacter> it = this.Chibies.iterator();
+			while (it.hasNext()) {
+				ChibiCharacter chibi = it.next();
+
+				if ((x > chibi.X) && (x < chibi.X + chibi.CharacterWidth) && (y > chibi.Y) && (y < chibi.Y + chibi.CharacterHeight)) {
+					it.remove();
+
+					Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.explosion);
+					this.Explosions.add(new Explosion(this, bitmap, chibi.X, chibi.Y));
+				}
+			}
 
 			for (ChibiCharacter chibi: this.Chibies) {
 				chibi.MovingVectorX = x - chibi.X;
