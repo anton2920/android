@@ -11,10 +11,13 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 	public GameThread GameThread_;
-	public ChibiCharacter Chibi1;
+	public List<ChibiCharacter> Chibies = new ArrayList<>();
 
 	public GameSurface(Context context) {
 		super(context);
@@ -24,19 +27,25 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	public void update() {
-		this.Chibi1.Update();
+		for (ChibiCharacter chibi: this.Chibies) {
+			chibi.Update();
+		}
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
 		super.draw(canvas);
-		this.Chibi1.Draw(canvas);
+
+		for (ChibiCharacter chibi: this.Chibies) {
+			chibi.Draw(canvas);
+		}
 	}
 
 	@Override
 	public void surfaceCreated(@NonNull SurfaceHolder holder) {
 		Bitmap chibi1 = BitmapFactory.decodeResource(this.getResources(), R.drawable.chibi1);
-		this.Chibi1 = new ChibiCharacter(this, chibi1, 100, 50);
+		this.Chibies.add(new ChibiCharacter(this, chibi1, 100, 50));
+		this.Chibies.add(new ChibiCharacter(this, chibi1, 300, 150));
 
 		this.GameThread_ = new GameThread(this, holder);
 		this.GameThread_.Running = true;
@@ -67,8 +76,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 			int x = (int) event.getX();
 			int y = (int) event.getY();
 
-			this.Chibi1.MovingVectorX = x - this.Chibi1.X;
-			this.Chibi1.MovingVectorY = y - this.Chibi1.Y;
+			for (ChibiCharacter chibi: this.Chibies) {
+				chibi.MovingVectorX = x - chibi.X;
+				chibi.MovingVectorY = y - chibi.Y;
+			}
 
 			return true;
 		}
