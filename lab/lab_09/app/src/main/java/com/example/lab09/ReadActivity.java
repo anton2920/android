@@ -78,6 +78,7 @@ public class ReadActivity extends AppCompatActivity {
 					Intent intent = new Intent(ReadActivity.this, ShowActivity.class);
 					intent.putExtra(Contatant.FirstName, user.FirstName);
 					intent.putExtra(Contatant.LastName, user.LastName);
+					intent.putExtra(Contatant.Patronymic, user.Patronymic);
 					intent.putExtra(Contatant.Email, user.Email);
 					startActivity(intent);
 				}
