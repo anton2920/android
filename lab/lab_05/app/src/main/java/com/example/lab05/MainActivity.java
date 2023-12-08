@@ -16,52 +16,32 @@ public class MainActivity extends Activity {
 
 	public SensorManager SensorManager_;
 	public Sensor SensorAccel;
-	public Sensor SensorLinAccel;
-	public Sensor SensorGravity;
 	public Sensor SensorMagnet;
 
-	public StringBuilder SB = new StringBuilder();
-
-	public Timer Timer_;
-
 	public float[] ValuesAccel = new float[3];
-	public float[] ValuesAccelMotion = new float[3];
-	public float[] ValuesAccelGravity = new float[3];
-	public float[] ValuesLinAccel = new float[3];
-	public float[] ValuesGravity = new float[3];
 	public float[] ValuesMagnet = new float[3];
+	public float[] Gravity = new float[9];
+	public float[] OutGravity = new float[9];
+	public float[] Values = new float[3];
 
-	public float Degree;
+	public float[] Degree = new float[1];
 
 	public SensorEventListener Listener = new SensorEventListener() {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			switch (event.sensor.getType()) {
 				case Sensor.TYPE_ACCELEROMETER:
-					for (int i = 0; i < 3; ++i) {
-						ValuesAccel[i] = event.values[i];
-						ValuesAccelGravity[i] = (float) (0.1 * event.values[i] + 0.9 * ValuesAccelGravity[i]);
-						ValuesAccelMotion[i] = event.values[i] - ValuesAccelGravity[i];
-					}
-					break;
-				case Sensor.TYPE_LINEAR_ACCELERATION:
-					System.arraycopy(event.values, 0, ValuesLinAccel, 0, 3);
-					break;
-				case Sensor.TYPE_GRAVITY:
-					System.arraycopy(event.values, 0, ValuesGravity, 0, 3);
+					System.arraycopy(event.values, 0, ValuesAccel, 0, 3);
 					break;
 				case Sensor.TYPE_MAGNETIC_FIELD:
 					System.arraycopy(event.values, 0, ValuesMagnet, 0, 3);
 					break;
 			}
 
-			float[] gravity = new float[9];
-			float[] outGravity = new float[9];
-			float[] values = new float[3];
-			SensorManager.getRotationMatrix(gravity, null, ValuesAccel, ValuesMagnet);
-			SensorManager.remapCoordinateSystem(gravity, SensorManager.AXIS_X, SensorManager.AXIS_Z, outGravity);
-			SensorManager.getOrientation(outGravity, values);
-			Degree = (float) (values[2] * 180 / Math.PI) + 90;
+			SensorManager.getRotationMatrix(Gravity, null, ValuesAccel, ValuesMagnet);
+			SensorManager.remapCoordinateSystem(Gravity, SensorManager.AXIS_X, SensorManager.AXIS_Z, OutGravity);
+			SensorManager.getOrientation(OutGravity, Values);
+			Degree[0] = (float) (Values[2] * 180 / Math.PI) + 90;
 		}
 
 		@Override
@@ -74,14 +54,10 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_main);
-		this.Text = (TextView) findViewById(R.id.Text);
+		setContentView(new Protactor(this, Degree));
 
 		this.SensorManager_ = (SensorManager) getSystemService(SENSOR_SERVICE);
-
 		this.SensorAccel = this.SensorManager_.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		this.SensorLinAccel = this.SensorManager_.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-		this.SensorGravity = this.SensorManager_.getDefaultSensor(Sensor.TYPE_GRAVITY);
 		this.SensorMagnet = this.SensorManager_.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 	}
 
@@ -90,23 +66,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 
 		this.SensorManager_.registerListener(this.Listener, this.SensorAccel, SensorManager.SENSOR_DELAY_NORMAL);
-		this.SensorManager_.registerListener(this.Listener, this.SensorLinAccel, SensorManager.SENSOR_DELAY_NORMAL);
-		this.SensorManager_.registerListener(this.Listener, this.SensorGravity, SensorManager.SENSOR_DELAY_NORMAL);
 		this.SensorManager_.registerListener(this.Listener, this.SensorMagnet, SensorManager.SENSOR_DELAY_NORMAL);
-
-		this.Timer_ = new Timer();
-		TimerTask task = new TimerTask() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						ShowInfo();
-					}
-				});
-			}
-		};
-		this.Timer_.schedule(task, 0, 400);
 	}
 
 	@Override
@@ -114,18 +74,5 @@ public class MainActivity extends Activity {
 		super.onPause();
 
 		this.SensorManager_.unregisterListener(this.Listener);
-		this.Timer_.cancel();
-	}
-
-	public String Format(float[] values) {
-		assert values.length == 3;
-		return String.format("%1$.1f\t\t%2$.1f\t\t%3$.1f", values[0], values[1], values[2]);
-	}
-
-	public void ShowInfo() {
-		this.SB.setLength(0);
-		this.SB.append("Acceleromter: ").append(this.Format(this.ValuesAccel)).append("\n\nAccel motion: ").append(this.Format(this.ValuesAccelMotion)).append("\nAccel gravity: ").append(this.Format(this.ValuesAccelGravity)).append("\n\nLin accel: ").append(this.Format(this.ValuesLinAccel)).append("\nGravity: ").append(this.Format(this.ValuesGravity)).append("\nMagnet: ").append(this.Format(this.ValuesMagnet));
-		this.SB.append("\n\nDegree: ").append(this.Degree);
-		this.Text.setText(this.SB);
 	}
 }
