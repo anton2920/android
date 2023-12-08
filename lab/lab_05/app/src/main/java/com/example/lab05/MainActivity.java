@@ -18,16 +18,20 @@ public class MainActivity extends Activity {
 	public Sensor SensorAccel;
 	public Sensor SensorLinAccel;
 	public Sensor SensorGravity;
+	public Sensor SensorMagnet;
 
 	public StringBuilder SB = new StringBuilder();
 
 	public Timer Timer_;
 
-	float[] ValuesAccel = new float[3];
-	float[] ValuesAccelMotion = new float[3];
-	float[] ValuesAccelGravity = new float[3];
-	float[] ValuesLinAccel = new float[3];
-	float[] ValuesGravity = new float[3];
+	public float[] ValuesAccel = new float[3];
+	public float[] ValuesAccelMotion = new float[3];
+	public float[] ValuesAccelGravity = new float[3];
+	public float[] ValuesLinAccel = new float[3];
+	public float[] ValuesGravity = new float[3];
+	public float[] ValuesMagnet = new float[3];
+
+	public float Degree;
 
 	public SensorEventListener Listener = new SensorEventListener() {
 		@Override
@@ -46,7 +50,18 @@ public class MainActivity extends Activity {
 				case Sensor.TYPE_GRAVITY:
 					System.arraycopy(event.values, 0, ValuesGravity, 0, 3);
 					break;
+				case Sensor.TYPE_MAGNETIC_FIELD:
+					System.arraycopy(event.values, 0, ValuesMagnet, 0, 3);
+					break;
 			}
+
+			float[] gravity = new float[9];
+			float[] outGravity = new float[9];
+			float[] values = new float[3];
+			SensorManager.getRotationMatrix(gravity, null, ValuesAccel, ValuesMagnet);
+			SensorManager.remapCoordinateSystem(gravity, SensorManager.AXIS_X, SensorManager.AXIS_Z, outGravity);
+			SensorManager.getOrientation(outGravity, values);
+			Degree = (float) (values[2] * 180 / Math.PI) + 90;
 		}
 
 		@Override
@@ -67,6 +82,7 @@ public class MainActivity extends Activity {
 		this.SensorAccel = this.SensorManager_.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		this.SensorLinAccel = this.SensorManager_.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		this.SensorGravity = this.SensorManager_.getDefaultSensor(Sensor.TYPE_GRAVITY);
+		this.SensorMagnet = this.SensorManager_.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 	}
 
 	@Override
@@ -76,6 +92,7 @@ public class MainActivity extends Activity {
 		this.SensorManager_.registerListener(this.Listener, this.SensorAccel, SensorManager.SENSOR_DELAY_NORMAL);
 		this.SensorManager_.registerListener(this.Listener, this.SensorLinAccel, SensorManager.SENSOR_DELAY_NORMAL);
 		this.SensorManager_.registerListener(this.Listener, this.SensorGravity, SensorManager.SENSOR_DELAY_NORMAL);
+		this.SensorManager_.registerListener(this.Listener, this.SensorMagnet, SensorManager.SENSOR_DELAY_NORMAL);
 
 		this.Timer_ = new Timer();
 		TimerTask task = new TimerTask() {
@@ -107,7 +124,8 @@ public class MainActivity extends Activity {
 
 	public void ShowInfo() {
 		this.SB.setLength(0);
-		this.SB.append("Acceleromter: ").append(this.Format(this.ValuesAccel)).append("\n\nAccel motion: ").append(this.Format(this.ValuesAccelMotion)).append("\nAccel gravity: ").append(this.Format(this.ValuesAccelGravity)).append("\n\nLin accel: ").append(this.Format(this.ValuesLinAccel)).append("\nGravity: ").append(this.Format(this.ValuesGravity));
+		this.SB.append("Acceleromter: ").append(this.Format(this.ValuesAccel)).append("\n\nAccel motion: ").append(this.Format(this.ValuesAccelMotion)).append("\nAccel gravity: ").append(this.Format(this.ValuesAccelGravity)).append("\n\nLin accel: ").append(this.Format(this.ValuesLinAccel)).append("\nGravity: ").append(this.Format(this.ValuesGravity)).append("\nMagnet: ").append(this.Format(this.ValuesMagnet));
+		this.SB.append("\n\nDegree: ").append(this.Degree);
 		this.Text.setText(this.SB);
 	}
 }
